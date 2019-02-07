@@ -2,9 +2,6 @@
 layout: post
 title: "An Introduction"
 ---
-
-# Welcome
-
 I mainly intend to use this space to braindump challenges I face and things I learn in my field. It is mainly for my own benefit, to reinforce things in my own mind, but maybe it will be of some use to someone else.
 
 A couple of updates on my general lifestyle: I am attempting to use as much Free and Open Source (FOSS) software as possible, as well as migrating my online life to services run by companies that respect my privacy more than the current mainstream alternatives. Some examples:
