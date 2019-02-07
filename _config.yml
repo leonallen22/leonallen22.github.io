@@ -1,0 +1,9 @@
+author: Leon Allen
+title: Software Engineer, Pragmatist, Philomath
+email: leon.allen22@protonmail.com
+
+description: The purpose of this site is to serve as a landing page for my own projects as well as provide a little information about myself and my experience. The website should be simple and accessible with regard to both technical constraints and disabilities. Please contact me through email if the site falls short of any of these goals.
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
