@@ -47,7 +47,7 @@ I decided to re-architect a bit this past week, to help ease any scaling we may 
 |  +-----------+ | +-----------+ | +-----------+
 |  |ConsulAgent+-+-+ConsulAgent+-+-+ConsulAgent|
 |  +-----------+   +-----------+   +-----------+
-|  |    Netdata|   |    Netdata|   |    Netdata|
+|  |  Netdata  |   |  Netdata  |   |  Netdata  |
 |  +-----^-----+   +-----^-----+   +-----^-----+
 |        |               |               |
 |        |               |               |
