@@ -18,16 +18,17 @@ We currently gather host metrics using a stack including Netdata, Cloudwatch, Pr
 |         |               |               |
 |         |               |               |
 |         |               |               |
-|         +---------------+-------+-------+
-|                                 |
-|                                 |                          +--+
-|                   +-----------  |                          |VM|
-+------------------->  Consul  |  |        +----------+      +--+
-                    +----v-----+  |        |CloudWatch<------+VM|
-                    |Prometheus<--+        +----+-----+      +--+
-                    +----v-----+                |            |VM|
-                    | Grafana  <----------------+            +--+
-                    +----------+
+|         +---------------+-------+-------+                   +--+
+|                                 |                        +--+VM|
+|                                 |                        |  +--+
+|                   +----------+  |                        |
++------------------->  Consul  |  |        +----------+    |  +--+
+                    +----v-----+  |        |CloudWatch<-------+VM|
+                    |Prometheus<--+        +----+-----+    |  +--+
+                    +----v-----+                |          |
+                    | Grafana  <----------------+          |  +--+
+                    +----------+                           +--+VM|
+                                                              +--+
 ```
 
 It's a bit difficult to depict the Consul cluster due to its complexity - just know that it uses a gossip protocol, which means that each Consul node can share knowledge with all other nodes.
@@ -36,34 +37,35 @@ It's a bit difficult to depict the Consul cluster due to its complexity - just k
 I decided to re-architect a bit this past week, to help ease any scaling we may need in the future. It will also be a bit easier to debug if/when something goes wrong with the components of the stack itself. I moved each service to its own host which makes it easier to swap out each service for upgrades, during service outages, or behind a load balancer. The new stack looks something like this:
 
 ```
-        +----------------+---------------+
-        |                |               |
-        |                |               |
-        |  +-----------+ | +-----------+ | +-----------+
-        |  |ConsulAgent<-+->ConsulAgent<-+->ConsulAgent|
-        |  +-----------+   +-----------+   +-----------+
-        |  |  Netdata  |   |  Netdata  |   |  Netdata  |
-        |  +-----+-----+   +-----+-----+   +-----+-----+
-        |        |               |               |
-        |        |               |               |
-        |        |               |               |
-        |        |               |               |
-        |        |               |               |
-        |        +---------------+-------+-------+
-        |                                |
-        |                                |
-        |                                |
-        |                                |
-        |     +-------+            +-----v-----+
-        +----->Consul1+------------>Prometheus1|
-+--+          +-------+            +-----+-----+
-|VM|                                     |
-+--+      +----------+                   |
-|VM+------>CloudWatch|                   |
-+--+      +----+-----+                   |
-|VM|           |            +--------+   |
-+--+           +------------>Grafana1<---+
-                            +--------+
+         +----------------+---------------+
+         |                |               |
+         |                |               |
+         |  +-----------+ | +-----------+ | +-----------+
+         |  |ConsulAgent<-+->ConsulAgent<-+->ConsulAgent|
+         |  +-----------+   +-----------+   +-----------+
+         |  |  Netdata  |   |  Netdata  |   |  Netdata  |
+         |  +-----+-----+   +-----+-----+   +-----+-----+
+         |        |               |               |
+         |        |               |               |
+         |        |               |               |
+         |        |               |               |
+         |        |               |               |
+         |        +---------------+-------+-------+
+         |                                |
+         |                                |
+         |                                |
+         |                                |
++--+     |     +-------+            +-----v-----+
+|VM+--+  +----->Consul1+------------>Prometheus1|
++--+  |        +-------+            +-----+-----+
+      |                                   |
++--+  |    +----------+                   |
+|VM+------->CloudWatch|                   |
++--+  |    +----+-----+                   |
+      |         |            +--------+   |
++--+  |         +------------>Grafana1<---+
+|VM+--+                      +--------+
++--+
 ```
 
 With this architecture we should be able to provision additional instances (to be labeled 'Grafana2', 'Prometheus2', etc.) of each service as needed and configure a load-balancer to automatically route traffic between instances, increasing reliability. Upgrades should also be easier within this configuration. And of course, revisiting this stack was useful in verifying our current settings are still appropriate, automating some of the service deployment, and resizing the hosts running the services.
