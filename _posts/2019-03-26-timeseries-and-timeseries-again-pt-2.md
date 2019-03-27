@@ -3,7 +3,7 @@ layout: post
 title: "Timeseries and Timeseries Again (pt. 2)"
 ---
 
-One new development I have been pretty excited about is the addition of Loki to our monitoring stack.Developed by the same individuals who develop for Grafana, Loki is a simple log aggregation system designed to be horizontally scalable, cost-effective, and easy to operate. It styles itself as "like Prometheus, but for logs", and that's really all I've wanted for the past year - that you can switch back and forth between metrics and logs within the same interface is just a bonus. Loki relies on promtail to tag and send logs from hosts you care about. Grafana can then use the Loki server as a datasource to present logs to the user, who can narrow down a subset of data based on labels (I decided on hostname, ip address, and filename as a starting set of labels) and perform simple greps on the relevant collection of log events. Loki is still in an alpha stage and as such, there is not a ton of documentation out there have successfully deployed Loki and Promtail instances that are good enough as a minimum viable product. Here is an updated diagram of the monitoring architecture we're working with:
+One new development I have been pretty excited about is the addition of Loki to our monitoring stack. Developed by the same individuals who develop for Grafana, Loki is a simple log aggregation system designed to be horizontally scalable, cost-effective, and easy to operate. It styles itself as "like Prometheus, but for logs", and that's really all I've wanted for the past year - that you can switch back and forth between metrics and logs within the same interface is just a bonus. Loki relies on promtail to tag and send logs from hosts you care about. Grafana can then use the Loki server as a datasource to present logs to the user, who can narrow down a subset of data based on labels (I decided on hostname, ip address, and filename as a starting set of labels) and perform simple greps on the relevant collection of log events. Loki is still in an alpha stage and as such, there is not a ton of documentation out there have successfully deployed Loki and Promtail instances that are good enough as a minimum viable product. Here is an updated diagram of the monitoring architecture we're working with:
 
 ```
       +----------------+---------------+
@@ -31,13 +31,16 @@ One new development I have been pretty excited about is the addition of Loki to 
       |     +-------+            +-----v-----+      +--v--+
       +-----+Consul1+------------>Prometheus1|      |Loki1|
 +--+        +-------+            +-----+-----+      +--+--+
-|VM+-+                                 |               |
-+--+ |    +----------+                 |               |
-|VM+------>CloudWatch|                 |               |
-+--+ |    +----+-----+                 |               |
-|VM+-+         |          +--------+   |               |
-+--+           +---------->Grafana1<---+---------------+
-                          +--------+
+|VM+---+                               |               |
++--+   |  +----------+                 |               |
+       +-->CloudWatch|                 |               |
++--+   |  +----+-----+                 |               |
+|VM+---+       |          +--------+   |               |
++--+   |       +---------->Grafana1<---+---------------+
+       |                  +--------+
++--+   |
+|VM+---+
++--+
 ```
 
 I did run into a couple of hurdles: due to recent rearchitecting and 'right-sizing' some of our hosts, we have some hosts with very limited resources and I made the mistake of writing deployment automation that deployed promtail by building it from source on each host - that was a bad time. At this stage in the projects development, options for deployment are slim, but luckily docker images are provided, which I was able to make some tweaks to for our use case. I also would have liked to configure our Loki server to use Amazon Web Services (AWS) Simple Storage Service (S3) for its storage, but after poking around a bit and following the few suggestions I could find in the repository, I couldn't get it working and went forward with a local storage configuration instead. I ran into a weird [issue](https://github.com/grafana/loki/issues/310) with our AWS secret access key which messed with the Loki configuration since it included a '/' as part of the key, causing Loki to resolve the URI incorrectly. I was able to generate a new key, but ran into more issues that caused me to pivot due to time constraints. I do look forward to following the project and watching it mature, and I have high hopes since Grafana has proven to be useful and reliable so far.
