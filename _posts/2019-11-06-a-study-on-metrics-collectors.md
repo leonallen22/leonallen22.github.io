@@ -1,0 +1,7 @@
+---
+layout: post
+title: "A Study on Metrics Collectors"
+---
+For a while now I've been using Netdata as my default option when collecting metrics, but I've heard a bit about other options and got curious. I couldn't find a direct comparison so I decided to do a quick one myself. My primary candidates are Netdata, Prometheus' Node Exporter, and Telegraf. My approach is essentially to install each on a separate EC2 instance on Amazon Web Services (AWS), scrape the metrics using Prometheus, and graph them in Grafana.
+
+Installation is predictably easy for each, so no issues there. I'm starting with the default configuration for each, with no plugins. Note that all expose metrics in the prometheus standard format by default. As of writing Node Exporter provides ~379 metrics, Telegraf provides ~193, and Netdata provides a whopping ~1833. Suffice to say I'm feeling vindicated right out of the gate. While comparatively, Netdata may seem excessive, it still doesn't consume any significant amount of CPU (<1% on average) or RAM (<100MB), and it's generally better to have too many metrics than not enough. If storage space is an issue (it shouldn't be), metrics can simply be dropped or the fidelity reduced. But are all these extra metrics actually feasibly useful?
